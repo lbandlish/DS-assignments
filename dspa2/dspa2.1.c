@@ -25,8 +25,7 @@ nodeop* revstack(nodeop* ohead);
 void evaluatepoly(nodeop* headeqn, int x, int y);
 nodeint* pushfullint(nodeop** headeqn, nodeint* headint, char ch, int x, int y);
 int priority(char ch);
-int compute(char op);
-
+int compute(int val1, char op, int val2);
 
 int main()
 {
@@ -49,7 +48,7 @@ int main()
 		{
 			// printf("hi\n");
 			headeqnrev = pushop(headeqnrev, ch);
-			ch = getchar();
+				ch = getchar();
 		}
 
 		int x, y;
@@ -69,7 +68,7 @@ int main()
 		nodeop* headeqn = revstack(headeqnrev);
 
 		// while (headeqn != NULL)
-		// {
+		// 	{
 		// 	printf("%c ", headeqn->op);
 		// 	headeqn = headeqn->next;
 		// }
@@ -158,77 +157,72 @@ void evaluatepoly(nodeop* headeqn, int x, int y)
 
 		if ( ch == 'x' || ch == 'y' || (ch >= '0' && ch <= '9') )
 		{
-			if (ch =='x')	//do for all 4 above cases.
+			headint = pushfullint(&headeqn, headint, ch, x, y);
+			
+			if (headop != NULL)
 			{
-				headint = pushint(headint, x);
-				if (headop != NULL)
-				{
-					if (headeqn != NULL)
-					{ 
-						headeqn = headeqn->next; // getting rid of the space. (after this headeqn points to space.)
+				if (headeqn != NULL)
+				{ 
+					// headeqn = headeqn->next; // getting rid of the space. (after this headeqn points to space.)
 
-						if (priority(headop->op) >= priority((headeqn->next)->op))
-						{
-							val1 = headint->val;
-							headint = popint(headint);
-							val2 = headint->val;
-							headint = popint(headint);
-							headint = pushint(headint, compute(val1, headop->op, val2));
-							headop = popop(headop);
-
-							if (headop != NULL)
-							{
-
-								if (priority(headop->op) >= priority((headeqn->next)))
-								{
-
-								}
-							}
-						}
-
-						else
-					}
-
-
-					else
+					if (priority(headop->op) >= priority((headeqn->next)->op))
 					{
 						val1 = headint->val;
 						headint = popint(headint);
 						val2 = headint->val;
 						headint = popint(headint);
 						headint = pushint(headint, compute(val1, headop->op, val2));
-						if (headint->next = NULL)
-						{
-							printf("%d\n",headint->val);
-						}
+						headop = popop(headop);
 
-						else
+						if (headop != NULL)
 						{
-							printf("Error: more than one entries in int stack after full traversal of headeqn\n");
+							if ( priority(headop->op) >= priority((headeqn->next)->op) )
+							{
+								val1 = headint->val;
+								headint = popint(headint);
+								val2 = headint->val;
+								headint = popint(headint);
+								headint = pushint(headint, compute(val1, headop->op, val2));
+								headop = popop(headop);
+							}
 						}
 					}
+
 				}
 
-			}
 
-			else if (ch == 'y')
-			{
-				headint = pushint(headint, y);
-				if (headop != NULL)
+				else
 				{
+					val1 = headint->val;
+					headint = popint(headint);
+					val2 = headint->val;
+					headint = popint(headint);
+					headint = pushint(headint, compute(val1, headop->op, val2));
+					headop = headop->next;
 
+					if (headop != NULL)
+					{
+						val1 = headint->val;
+						headint = popint(headint);
+						val2 = headint->val;
+						headint = popint(headint);
+						headint =  pushint(headint, compute(val1, headop->op, val2));
+						headop = headop->next;
+					}
+
+					if (headint->next == NULL)
+					{
+						printf("%d\n",headint->val);
+						return;
+					}
+
+					else
+					{
+						printf("Error: more than one entries in int stack after full traversal of headeqn\n");
+					}
 				}
 			}
 
-			else
-			{
-
-				headint = pushfullint(&headeqn, headint, ch, x, y);
-				if (headop != NULL)
-				{
-
-				}
-			}
 		}
 
 		else if (ch == '*' || ch == '/' || ch == '+' || ch == '-' )
@@ -267,6 +261,30 @@ nodeint* pushfullint(nodeop** headeqn, nodeint* headint, char ch, int x, int y)
 	int helper;
 	int final = 0;
 	int factor = 1;
+
+	if (chint == 'x')
+	{
+		if ((*headeqn)->op == 'y')
+		{
+			headint = pushint(headint, (x*y));
+			return headint;
+		}
+
+		headint = pushint(headint, x);
+		return headint;
+	}
+
+	else if (chint == 'y')
+	{
+		if ((*headeqn)->op == 'x')
+		{
+			headint = pushint(headint, (x*y));
+			return headint;
+		}
+
+		headint = pushint(headint, y);
+		return headint;
+	}
 
 	do 
 	{
