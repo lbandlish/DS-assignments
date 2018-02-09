@@ -9,7 +9,7 @@ void storeinput (vector < pair<int, int> > &v, int n);
 void inorder(vector < pair<int, int> > &v, int n, int curr, int parent);
 
 
-main()
+int main()
 {
 	int t;
 
@@ -26,8 +26,12 @@ main()
 
 		inorder(v, n, 1, 0);
 		
+		v.clear();
+
 		printf("\n");
 	}
+
+	return 0;
 }
 
 int compare (const void * a, const void * b)
@@ -105,4 +109,6 @@ void inorder(vector < pair<int, int> > &v, int n, int curr, int parent)
 	{
 		inorder(v, n, vcurr[i], curr);
 	}
+
+	vcurr.clear();
 }
