@@ -74,21 +74,42 @@ void forget(vector <char[11]> &dic)
 
     int index = 1;
 
-    int size = dic.size();
+    int size = dic.size() - 1;
 
-    while(index < size)
+    while(index <= size/2)
     {
+        if (size = 2*index)
+        {
+            if (strcmp(dic[index], dic[index*2]) > 0)
+            {
+                swap(dic[index*2], dic[index]);
+                break;
+            }
+
+            else
+            {
+                break;
+            }
+        }
+
         if (strcmp(dic[index], dic[index*2]) > 0 || strcmp(dic[index], dic[index*2 + 1]) > 0)
         {
             if (strcmp(dic[index*2],dic[index*2 + 1]) < 0)
             {
                 swap(dic[index], dic[index*2]);
+                index = index*2;
             }
 
             else
             {
                 swap(dic[index], dic[index*2 + 1]);
+                index = index*2 + 1;
             }
+        }
+
+        else
+        {
+            break;
         }
     }
 }
