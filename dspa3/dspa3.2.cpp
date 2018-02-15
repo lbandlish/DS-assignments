@@ -112,16 +112,22 @@ void learn(node* &head)
 
 }
 
-void forget(node* &head)
-{
-    
-}
 
-void findrank(node* &head)
+void findrank(node* &head, int flag, char* word)
 {
-    char* c = (char*)malloc(11*sizeof(char));
+    char* c;
 
-    cin >> c;
+    if (flag == 0)
+    {
+        c = (char*)malloc(11*sizeof(char));
+        cin >> c;
+    }
+
+    else
+    {
+        c = word;
+    }
+
     node* curr = head;
     int rank = 0;
 
@@ -163,6 +169,174 @@ void findrank(node* &head)
     cout << rank << endl;
 }
 
+
+void forget(node* &head)
+{
+    char*c = (char*)malloc(11*sizeof(char));
+
+    cin >> c;
+    node* curr = head;
+    node* prev = head;
+    char dir;
+
+    if (strcmp(c, head->word) == 0)
+    {
+        printf("%d\n", curr->des + 1);
+        
+        if (head->left == NULL)
+        {
+            head = head->right;
+        }
+
+        else if (head->right == NULL)
+        {
+            head = head->left;
+        }
+
+        else
+        {
+            node* lchild = head->left;
+                                
+            if (lchild->right == NULL)
+            {
+                lchild->right = head->right;
+                lchild->des = head->des - 1;
+                
+                head = lchild;
+            }
+
+            else
+            {
+                node* par;
+
+                while (lchild->right != NULL)
+                {
+                    par = lchild;
+                    lchild->des--;
+                    lchild = lchild->right;
+                }
+
+                par->right = lchild->left;
+
+                lchild->des = head->des - 1;   //check this
+                lchild->left = head->left;
+                lchild->right = head->right;
+
+                head = lchild;
+            }
+        }
+    }
+
+
+    else
+    {
+        findrank(head, 1, c);
+
+        while(1)    //chance of forever loop.
+        {
+            if (strcmp(c, curr->word) < 0)      //there is scope of saving time by calculating strcmp and saving it in variable.
+            {
+                dir = 'l';
+                curr->des--;
+                prev = curr;
+                curr = curr->left;
+            }
+
+            else if (strcmp(c, curr->word) > 0)
+            {
+
+                dir = 'r';
+                curr->des--;
+                prev = curr;
+                curr = curr->right;
+            }
+
+            else
+            {
+                if (curr->left == NULL)
+                {
+                    if (dir == 'l')
+                    {
+                        prev->left = curr->right;
+                    }
+
+                    else
+                    {
+                        prev->right = curr->right;
+                    }
+                }
+
+                else if (curr->right == NULL)
+                {
+                    if (dir == 'l')
+                    {
+                        prev->left = curr->left;
+                    }
+
+                    else
+                    {
+                        prev->right = curr->left;
+                    }
+                }
+
+                else
+                {
+                    node* lchild = curr->left;  
+                    
+                    if (lchild->right == NULL)
+                    {
+                        lchild->right = curr->right;
+                        lchild->des = curr->des - 1;
+                        
+                        if (dir == 'l')
+                        {
+                            prev->left = lchild;
+                        }
+
+                        else
+                        {
+                            prev->right = lchild;
+                        }
+
+                    }
+
+                    else
+                    {
+                        node* par;
+
+                        while (lchild->right != NULL)
+                        {
+                            par = lchild;
+                            lchild->des--;
+                            lchild = lchild->right;
+                        }
+
+                        par->right = lchild->left;
+
+                        lchild->des = curr->des - 1;   //check this
+                        lchild->left = curr->left;
+                        lchild->right = curr->right;
+
+                        if (dir == 'l')
+                        {
+                            prev->left = lchild;
+                        }
+
+                        else
+                        {
+                            prev->right = lchild;
+                        }
+                    }
+
+                }
+
+                break;
+            }
+
+        }
+    }   
+}
+
 int main()
 {
     int q;
@@ -183,7 +357,7 @@ int main()
                     break;
             case 2: forget(head);
                     break;
-            case 3: findrank(head);
+            case 3: findrank(head, 0, NULL);
                     break;
         }
     }
