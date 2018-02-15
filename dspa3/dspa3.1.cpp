@@ -29,7 +29,7 @@ int interpretcmd(char* cmd)
     }
 
     else {
-        printf("error\n";)
+        printf("error\n");
     }
 }
 
@@ -40,37 +40,50 @@ void swap(char* &c1, char* &c2)
     c2 = temp;
 }
 
-void learn(vector <char[11]> &dic)
+void learn(vector <char*> &dic)
 {
     int index = dic.size();
 
     char* c = (char*)malloc(11*sizeof(char));
     scanf("%s", c);
     dic.push_back(c);
-
-
+    
+    // cout << "size is" << dic.size() << endl;
     while(index > 1)
     {
+        // cout << "hey";
         if (strcmp(dic[index],dic[index/2]) < 0)
         {
+            // cout << "hi";
             swap(dic[index], dic[index/2]);
+            index = index/2;
         }
 
-        index = index/2;
+        else
+        {
+            break;
+        }
     }
+
+    // for (int i = 0; i < dic.size(); i++)
+    // {
+    //     cout << "value at " << i << " is " << dic[i] << endl;
+    // }
+
+    // cout << "input string: " << c << endl;
 }
 
-void report(vector <char[11]> &dic)
+void report(vector <char*> &dic)
 {
     cout << dic[1] << endl;
 }
 
-void forget(vector <char[11]> &dic)
+void forget(vector <char*> &dic)
 {
     cout << dic[1] << endl;
-
-    dic[1] = dic[dic.size() - 1];
-    dic.resize(dic.size() - 1);
+    int finalsize = dic.size() - 1;
+    dic[1] = dic[finalsize];
+    dic.resize(finalsize);
 
     int index = 1;
 
@@ -78,7 +91,7 @@ void forget(vector <char[11]> &dic)
 
     while(index <= size/2)
     {
-        if (size = 2*index)
+        if (size == 2*index)
         {
             if (strcmp(dic[index], dic[index*2]) > 0)
             {
@@ -112,6 +125,12 @@ void forget(vector <char[11]> &dic)
             break;
         }
     }
+
+
+    // for (int i = 1; i < dic.size(); i++)
+    // {
+    //     cout << "value at " << i << " is " << dic[i][0] << endl;
+    // }
 }
 
 int main()
@@ -121,13 +140,14 @@ int main()
     int q = 0;
     scanf("%d", &q);
 
+    vector <char*> dic;
+
+    char foo[11] = "1111111111";
+    char *bar = foo;
+    dic.push_back(bar);
+
     for (int i = 0; i < q; i++)
     {
-        vector <char[11]> dic;
-        char foo[11] = "1111111111\0"
-        
-        dic.push_back(foo)
-        
         scanf("%s", cmd);
         
         int ip = interpretcmd(cmd);
@@ -145,4 +165,5 @@ int main()
 
         }
     }
+    return 0;
 }
