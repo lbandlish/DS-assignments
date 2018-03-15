@@ -1,366 +1,139 @@
-#include <iostream>
-#include <vector>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include<stdio.h>
+#include<stdlib.h>
+#include<fcntl.h>
+#include<sys/time.h>
+#include<pthread.h>
 
-using namespace std;
+#define TDIFF(start, end) ((end.tv_sec - start.tv_sec) * 1000000UL + (end.tv_usec - start.tv_usec))
 
-typedef struct bstnode {
-    char* word;
-    struct bstnode* left;
-    struct bstnode* right;
-    int des;   //no. of descendants + 1
-} node;
+pthread_mutex_t condition_mutex[10000];
+pthread_mutex_t count_mutex; 
+int c;
+// int locked[10000];
+float balance[10000];
+int statements=0;
+int no_of_txn;
+typedef struct txn{
+    int txn_seq;
+    int type;
+    float amount;
+    int ac1;
+    int ac2;
+}transaction;
 
-int interpret (char* cmd)
-{
-    char l[] = "learn";
-    char fo[] = "forget";
-    char fi[] = "findrank";
+transaction Transactions[10];
 
-    if (strcmp(cmd,l) == 0)
-    {
-        return 1;
-    }
-
-    else if (strcmp(cmd,fo) == 0)
-    {
-        return 2;
-    }
-
-    else if (strcmp(cmd, fi) == 0)
-    {
-        return 3;
-    }
-    
-    else 
-    {
-        printf("error\n");
-        return -1;
-    }
-}
-
-void swap(node &n1, node &n2)
-{
-      node temp = n1;
-      n1 = n2;
-      n2 = temp;
-}
-
-void learn(node* &head)
-{
-    node* n = (node*)malloc(sizeof(node));
-    char* c = (char*)malloc(11*sizeof(char));
-
-    cin >> c;
-    n->word = c;
-    n->left = NULL;
-    n->right = NULL;
-    n->des = 1;
-
-
-    if (head == NULL)
-    {
-        head = n;
-    }
-
-    else 
-    {
-        node* curr = head;
-
-        while (1)
-        {
-            if (strcmp(n->word,curr->word) < 0)
-            {
-                curr->des++;
-
-                if (curr->left == NULL)
-                {
-                    curr->left = n;
-                    break;
-                }
-
-                else 
-                {
-                    curr = curr->left;
-                }
-            }
-
-            else if (strcmp(n->word, curr->word) > 0)
-            {
-                curr->des++;
-
-                if (curr->right == NULL)
-                {
-                    curr->right = n;
-                    break;
-                }
-
-                else
-                {
-                    curr = curr->right;
-                }
-            }
-
-            else
-            {
-                break;
-            }
-        }
-    }
-
-}
-
-
-void findrank(node* &head, int flag, char* word)
-{
-    char* c;
-
-    if (flag == 0)
-    {
-        c = (char*)malloc(11*sizeof(char));
-        cin >> c;
-    }
-
-    else
-    {
-        c = word;
-    }
-
-    node* curr = head;
-    int rank = 0;
+void* func(){
+    int txn_seq;
+    int type;
+    float amount;
+    int ac1;
+    int ac2;
 
     while(1)
     {
-        if (strcmp(c, curr->word) < 0)
+        pthread_mutex_lock(&count_mutex);
+        printf("%d ", c + 1);
+        if(c >= no_of_txn) break;
+        txn_seq=Transactions[c].txn_seq;
+        type= Transactions[c].type;
+        amount=Transactions[c].amount;
+        ac1=Transactions[c].ac1;
+        ac2 = Transactions[c].ac2;
+        c++;
+        pthread_mutex_unlock(&count_mutex);
+
+        pthread_mutex_lock(&condition_mutex[ac1 - 1001]);
+        if(type == 1)
         {
-            curr = curr->left;
+            balance[ac1-1001]=balance[ac1-1001]+amount*0.99;
+        }
+        if(type==2){
+            balance[ac1-1001]=balance[ac1-1001]-amount*1.01;
         }
 
-        else if (strcmp(c, curr->word) > 0)
-        {   
-            if (curr->left != NULL)
-            {
-                rank = rank + (curr->left)->des;
-            }
-
-            rank = rank + 1;
-            curr = curr->right;
+        if(type==3){
+            balance[ac1-1001]+=balance[ac1-1001]*0.071;
         }
-
-        else
+        if(type == 4)
         {
-            
-            if (curr->left != NULL)
-            {
-                rank = rank + (curr->left)->des + 1;
-            }
-
-            else
-            {
-                rank = rank + 1;
-            }
-
-            break;
+            pthread_mutex_lock(&condition_mutex[ac2 - 1001]);
+            balance[ac1-1001]-=amount*1.01;
+            balance[ac2-1001]+=amount*0.99;
+            pthread_mutex_unlock(&condition_mutex[ac2 - 1001]);
         }
+        pthread_mutex_unlock(&condition_mutex[ac1 - 1001]);
     }
-
-    cout << rank << endl;
+    pthread_exit(NULL); 
 }
 
+int main(int argc, char **argv){
+    c=0;
+    no_of_txn=atoi(argv[3]);
+    int Threads=atoi(argv[4]);
+    pthread_t threads[Threads];
+    struct timeval start, end;
+    if(argc!= 5){
+        printf("Usage: %s <fileneme>\n,%s {Account_file},%s {Transaction_file},%s {#of Transactions},%s {#of Threads}", argv[0],argv[1],argv[2],argv[3],argv[4]);
+        exit(-1);         
+    }
+    FILE* fd1=fopen(argv[1],"r+");
+    int cnt=0;
+    while(1){
+        int val1;
+        float val2;
+        int ret=fscanf(fd1,"%d %f",&val1,&val2);
+        if(ret==2){
+            balance[cnt]=val2;
+            cnt++;
+        }
+        else break;
+    }
+    fclose(fd1);
 
-void forget(node* &head)
-{
-    char*c = (char*)malloc(11*sizeof(char));
-
-    cin >> c;
-    node* curr = head;
-    node* prev = head;
-    char dir;
-
-    if (strcmp(c, head->word) == 0)
+    cnt=0;
+    fd1=fopen(argv[2],"r+");
+    while(1){
+        int val1;
+        int val2;
+        int ac_1;
+        int ac_2;
+        float val3;
+        int ret=fscanf(fd1,"%d %d %f %d %d",&val1,&val2,&val3,&ac_1,&ac_2);
+        if(ret==5){
+            Transactions[cnt].txn_seq=val1;
+            Transactions[cnt].type=val2;
+            Transactions[cnt].amount=val3;
+            Transactions[cnt].ac1=ac_1;
+            Transactions[cnt].ac2=ac_2;
+            cnt++;
+        }
+        else break;
+    }
+    fclose(fd1);
+    for(int i=0;i<10000;i++){
+        locked[i]=0;
+    }
+    gettimeofday(&start, NULL);
+    for (int i = 0; i < 10000; i ++)
     {
-        printf("%d\n", curr->des + 1);
-        
-        if (head->left == NULL)
-        {
-            head = head->right;
-        }
-
-        else if (head->right == NULL)
-        {
-            head = head->left;
-        }
-
-        else
-        {
-            node* lchild = head->left;
-                                
-            if (lchild->right == NULL)
-            {
-                lchild->right = head->right;
-                lchild->des = head->des - 1;
-                
-                head = lchild;
-            }
-
-            else
-            {
-                node* par;
-
-                while (lchild->right != NULL)
-                {
-                    par = lchild;
-                    lchild->des--;
-                    lchild = lchild->right;
-                }
-
-                par->right = lchild->left;
-
-                lchild->des = head->des - 1;   //check this
-                lchild->left = head->left;
-                lchild->right = head->right;
-
-                head = lchild;
-            }
+        pthread_mutex_init(&condition_mutex[i], NULL);
+    }
+    pthread_mutex_init(&count_mutex, NULL);
+    int ctr;
+    for(ctr=0; ctr < Threads; ++ctr){
+        if(pthread_create(&threads[ctr],NULL,func,NULL) != 0){
+            perror("pthread_create");
+            exit(-1);
         }
     }
 
+    for(ctr=0; ctr < Threads; ++ctr)
+        pthread_join(threads[ctr], NULL);
 
-    else
-    {
-        findrank(head, 1, c);
-
-        while(1)    //chance of forever loop.
-        {
-            if (strcmp(c, curr->word) < 0)      //there is scope of saving time by calculating strcmp and saving it in variable.
-            {
-                dir = 'l';
-                curr->des--;
-                prev = curr;
-                curr = curr->left;
-            }
-
-            else if (strcmp(c, curr->word) > 0)
-            {
-
-                dir = 'r';
-                curr->des--;
-                prev = curr;
-                curr = curr->right;
-            }
-
-            else
-            {
-                if (curr->left == NULL)
-                {
-                    if (dir == 'l')
-                    {
-                        prev->left = curr->right;
-                    }
-
-                    else
-                    {
-                        prev->right = curr->right;
-                    }
-                }
-
-                else if (curr->right == NULL)
-                {
-                    if (dir == 'l')
-                    {
-                        prev->left = curr->left;
-                    }
-
-                    else
-                    {
-                        prev->right = curr->left;
-                    }
-                }
-
-                else
-                {
-                    node* lchild = curr->left;  
-                    
-                    if (lchild->right == NULL)
-                    {
-                        lchild->right = curr->right;
-                        lchild->des = curr->des - 1;
-                        
-                        if (dir == 'l')
-                        {
-                            prev->left = lchild;
-                        }
-
-                        else
-                        {
-                            prev->right = lchild;
-                        }
-
-                    }
-
-                    else
-                    {
-                        node* par;
-
-                        while (lchild->right != NULL)
-                        {
-                            par = lchild;
-                            lchild->des--;
-                            lchild = lchild->right;
-                        }
-
-                        par->right = lchild->left;
-
-                        lchild->des = curr->des - 1;   //check this
-                        lchild->left = curr->left;
-                        lchild->right = curr->right;
-
-                        if (dir == 'l')
-                        {
-                            prev->left = lchild;
-                        }
-
-                        else
-                        {
-                            prev->right = lchild;
-                        }
-                    }
-
-                }
-
-                break;
-            }
-
-        }
-    }   
-}
-
-int main()
-{
-    int q;
-    cin >> q;
-
-    node* head = NULL;
-    char cmd[11];
-
-    for (int i = 0; i < q; i++)
-    {
-        cin >> cmd;
-
-        int ip = interpret(cmd);
-
-        switch(ip)
-        {
-            case 1: learn(head);
-                    break;
-            case 2: forget(head);
-                    break;
-            case 3: findrank(head, 0, NULL);
-                    break;
-        }
-    }
-
+    for(ctr=0; ctr < 10000; ++ctr)
+        printf("%d %.2f\n",ctr+1001,balance[ctr]); 
+    gettimeofday(&end, NULL);
+    printf("Time taken = %ld microsecs\n", TDIFF(start, end));
     return 0;
 }

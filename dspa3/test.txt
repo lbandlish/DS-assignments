@@ -1,0 +1,11 @@
+10
+learn monhdjaecg
+learn aelakggcfe
+learn mhbmldlcim
+learn ahlidlmdlj
+learn dlneeklean
+forget mhbmldlcim
+findrank ahlidlmdlj
+findrank monhdjaecg
+forget ahlidlmdlj
+findrank monhdjaecg
