@@ -36,18 +36,10 @@ void check_max(int freq, int index)
 {
     if (freq > mfreq)
     {
-        if (freq != mfreq + 1)
-        {
-            printf("freq is %d, and mfreq is %d", freq, mfreq);
-            printf("freq != mfreq + 1 but freq > mfreq\n");
-        }
-
         mfreq = freq;
         mfreqid = index;
     }
 }
-
-// all nodes at mfreqid must be compared.
 
 htnode** create_ht(int n)
 {
@@ -142,5 +134,4 @@ int main()
     }
 
     find_and_print_fav(ht);
-    // max need to be compared. printf("%s\n", ht[mfreqid]->word);
 }

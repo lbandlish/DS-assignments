@@ -1,0 +1,25 @@
+void printInorder(node* node)
+{
+     if (node == NULL)
+          return;
+ 
+     /* first recur on left child */
+     printf("%s(%d, %d):\n", node->word, node->ht, node->des);
+     
+     if (node->left != NULL)
+     {
+         printf("l- %s ", (node->left)->word);
+     }
+     
+     if (node->right != NULL)
+     {
+         printf("r- %s ", (node->right)->word);
+     }
+
+     printf("\n");
+
+     printInorder(node->left);
+     printInorder(node->right);
+
+     printf("\n");
+}

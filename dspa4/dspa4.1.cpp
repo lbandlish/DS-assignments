@@ -13,32 +13,42 @@ typedef struct bstnode {
     int des;    // no. of descendants + 1
     int ht;     // height of node
 } node;
- 
+
+
 void printInorder(node* node)
 {
      if (node == NULL)
           return;
  
      /* first recur on left child */
-     printf("%s:\n", node->word);
+    //  printf("%s(%d, %d):\n", node->word, node->ht, node->des);
      
      if (node->left != NULL)
      {
-         printf("l- %s ", (node->left)->word);
+         if (strcmp((node->left)->word, node->word) > 0)
+         {
+             printf(" left greater than root\n");
+            printf("l- %s ", (node->left)->word);
+         }
      }
      
      if (node->right != NULL)
      {
-         printf("r- %s ", (node->right)->word);
+         if (strcmp((node->right)->word, node->word) < 0)
+         {
+             printf(" right smaller than root \n");
+            printf("r- %s ", (node->right)->word);
+         }
      }
 
-     printf("\n");
+    //  printf("\n");
 
      printInorder(node->left);
      printInorder(node->right);
 
-     printf("\n");
+    //  printf("\n");
 }
+
 
 int find_diff(node* head);
 void balance_tree(node* &head, char* c);
@@ -82,10 +92,10 @@ int main()
                     break;
         }
 
-
-        // printf("%s is head\n", head->word);
+        // if (i == 109 || i == 110)
         printInorder(head);
-        printf("\n");
+        // // printf("%s is head\n", head->word);
+        // printf("\n");
     }
  
     return 0;
@@ -149,6 +159,7 @@ void balance_tree(node* &head, char* c)
 
     if (hdiff == 0 || hdiff == 1 || hdiff == -1)
     {
+        head->ht = find_height(head);
         return;
     }
 
@@ -184,6 +195,8 @@ void balance_tree(node* &head, char* c)
         {
             printf("hdiff out of bound\n (balance_tree function)");
         }
+
+        head->ht = find_height(head);
     }
 }
 
@@ -714,6 +727,7 @@ node* delete_node(node* curr, node* prev, char dir, char* c) //dir and prev unne
     {
         curr->left = delete_node(curr->left, curr, 'l', c);
         curr->ht = find_height(curr);
+        curr->des--; //added later
 
         return curr;
     }
@@ -722,6 +736,7 @@ node* delete_node(node* curr, node* prev, char dir, char* c) //dir and prev unne
     {
         curr->right = delete_node(curr->right, curr, 'r', c);
         curr->ht = find_height(curr);
+        curr->des--; //added later
 
         return curr;
     }
@@ -760,8 +775,9 @@ node* delete_node(node* curr, node* prev, char dir, char* c) //dir and prev unne
             //     lchild = lchild->right;
             // }
 
-            return delete_curr(lchild, curr, curr);
-
+            node* intermediate =  delete_curr(lchild, curr, curr);
+            curr->ht = find_height(curr);
+            return curr;
             // par->right = lchild->left;
         }
     }
@@ -774,6 +790,7 @@ node* delete_curr(node* lchild, node* par, node* &curr)
         lchild->des--;
         lchild->right = delete_curr(lchild->right, lchild, curr);
         lchild->ht = find_height(lchild);
+        return lchild;  //added later
     }
 
     else
@@ -783,6 +800,8 @@ node* delete_curr(node* lchild, node* par, node* &curr)
         lchild->des = curr->des - 1;
         lchild->left = curr->left;
         lchild->right = curr->right;
+
+        // printf("I am lchild - %s\n", lchild->word);
 
         curr = lchild;
 

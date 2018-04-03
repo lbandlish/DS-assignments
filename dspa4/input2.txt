@@ -1,0 +1,25 @@
+23
+learn ll
+learn hh
+learn mm
+learn ac
+learn ii
+learn lq
+learn mw
+learn ab
+learn bb
+learn hw
+learn jj
+learn lo
+learn ls
+learn mn
+learn aa
+learn ae
+learn dd
+learn jb
+learn kk
+learn lt
+learn cf
+forget hh
+findrank cf
+findrank ll
