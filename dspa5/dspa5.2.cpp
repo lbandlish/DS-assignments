@@ -123,11 +123,12 @@ void FindShortestRoute(vector < vector <int> > &Adj, int n){
 
         S.push_back(mini);
         
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < Q.size(); i++)
         {
             if (Q[i] == mini)
             {
                 Q.erase(Q.begin() + i);
+                i--;
             }
         }
     }
